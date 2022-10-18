@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserDao userRepository;
+
     @Override
     public List<UserDto> getAllUsers() {
         return userRepository.getAllUsers().stream()

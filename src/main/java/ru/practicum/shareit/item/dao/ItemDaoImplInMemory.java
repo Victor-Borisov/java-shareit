@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 public class ItemDaoImplInMemory implements ItemDao {
     private final Map<Integer, Item> items = new HashMap<>();
     private static int id = 0;
+
     private int getId() {
         return ++id;
     }

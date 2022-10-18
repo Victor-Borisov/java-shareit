@@ -5,6 +5,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 public class ItemMapper {
+
     public static ItemDto toItemDto(Item item) {
         return ItemDto.builder()
                 .id(item.getId())
@@ -14,6 +15,7 @@ public class ItemMapper {
                 .requestId(item.getRequest() != null ? item.getRequest().getId() : null)
                 .build();
     }
+
     public static Item fromItemDto(ItemDto itemDto, User owner, ItemRequest request) {
         return Item.builder()
                 .id(itemDto.getId())

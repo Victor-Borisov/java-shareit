@@ -9,9 +9,11 @@ import java.util.*;
 public class UserDaoImplInMemory implements UserDao {
     private final Map<Integer, User> users = new HashMap<>();
     private static int id = 0;
+
     private int getId() {
         return ++id;
     }
+
     @Override
     public User createUser(User user) {
         int id = getId();

@@ -15,6 +15,7 @@ import java.util.List;
 public class ItemController {
     private final ItemService itemService;
     private static final String HEADER_USER_ID = "X-Sharer-User-Id";
+
     @GetMapping
     public List<ItemDto> getAllItemsByOwner(@RequestHeader(HEADER_USER_ID) Integer ownerId) {
         return itemService.getItemsByOwner(ownerId);
