@@ -1,20 +1,14 @@
 package ru.practicum.shareit.item.dao;
 
+import ru.practicum.shareit.Dao;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface ItemDao {
-    Item createItem(Item item);
+public interface ItemDao extends Dao<Item> {
 
-    Item updateItem(Integer id, Item item);
+    List<Item> getByOwner(Long userId);
 
-    Optional<Item> getItemById(Integer id);
+    List<Item> search(String query);
 
-    List<Item> getItemsByOwner(Integer userId);
-
-    List<Item> searchItems(String query);
-
-    Optional<Item> deleteItem(Integer id);
 }

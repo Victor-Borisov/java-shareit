@@ -1,21 +1,17 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exceptions.BadRequestException;
-import ru.practicum.shareit.exceptions.ObjectNotFoundException;
-import ru.practicum.shareit.exceptions.ValidationException;
+import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.exceptions.ConflictException;
 import ru.practicum.shareit.user.dao.UserDao;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -23,53 +19,45 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getAllUsers() {
-        return userRepository.getAllUsers().stream()
+        return userRepository.getAll().stream()
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public UserDto getUserById(Integer id) {
-        User user = userRepository.getUserById(id)
-                .orElseThrow(() -> new ObjectNotFoundException("User with id = " + id + " not found"));
+    public UserDto getUserById(Long id) {
+        User user = userRepository.getById(id)
+                .orElseThrow(() -> new NotFoundException("User with id = " + id + " not found"));
         return UserMapper.toUserDto(user);
     }
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        validateEmail(userDto.getEmail());
-        User user = userRepository.createUser(UserMapper.fromUserDto(userDto));
+        throwIfExists(userDto.getEmail());
+        User user = userRepository.create(UserMapper.fromUserDto(userDto));
         return UserMapper.toUserDto(user);
     }
 
     @Override
-    public UserDto updateUser(Integer id, UserDto userDto) {
-        User user = userRepository.getUserById(id)
-                .orElseThrow(() -> new ObjectNotFoundException("User with id = " + id + " not found"));
-        if (userDto.getName() != null) {
-            user.setName(userDto.getName());
+    public UserDto updateUser(Long id, UserDto userDto) {
+        UserDto userDtoExisted = getUserById(id);
+        if (userDto.getEmail() != null && !userDto.getEmail().equals(userDtoExisted.getEmail())) {
+            throwIfExists(userDto.getEmail());
         }
-        if (userDto.getEmail() != null && validateEmail(userDto.getEmail())) {
-            user.setEmail(userDto.getEmail());
-        }
-        return UserMapper.toUserDto(userRepository.updateUser(id, user));
+        return UserMapper.toUserDto(userRepository.update(id, UserMapper.fromUserDto(userDto)));
     }
 
     @Override
-    public UserDto deleteUser(Integer id) {
+    public UserDto deleteUser(Long id) {
         UserDto userDto = getUserById(id);
-        userRepository.deleteUser(id);
+        userRepository.delete(id);
         return userDto;
     }
 
-    private boolean validateEmail(String email) {
-        if (email == null || email.isEmpty()) {
-            throw new BadRequestException("Email can not be empty");
-        }
-        if (userRepository.getAllUsers().stream()
-            .anyMatch(user -> user.getEmail().toLowerCase(Locale.ROOT).equals(email.toLowerCase()))) {
-            throw new ValidationException("User with email = " + email + " already exists");
-        }
-        return true;
+    private void throwIfExists(String email) {
+        userRepository.getAll().stream()
+            .filter(user -> user.getEmail().equalsIgnoreCase(email))
+            .findAny()
+            .ifPresent(s -> {throw new ConflictException("User with email = " + email + " already exists");});
     }
 }

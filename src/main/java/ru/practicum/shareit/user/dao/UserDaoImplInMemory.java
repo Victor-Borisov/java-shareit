@@ -7,23 +7,23 @@ import java.util.*;
 
 @Repository
 public class UserDaoImplInMemory implements UserDao {
-    private final Map<Integer, User> users = new HashMap<>();
-    private static int id = 0;
+    private final Map<Long, User> users = new HashMap<>();
+    private static long id = 0;
 
-    private int getId() {
+    private long getId() {
         return ++id;
     }
 
     @Override
-    public User createUser(User user) {
-        int id = getId();
+    public User create(User user) {
+        long id = getId();
         user.setId(id);
         users.put(id, user);
         return user;
     }
 
     @Override
-    public User updateUser(Integer id, User patchUser) {
+    public User update(Long id, User patchUser) {
         User user = users.get(id);
         if (patchUser.getName() != null) {
             user.setName(patchUser.getName());
@@ -36,17 +36,17 @@ public class UserDaoImplInMemory implements UserDao {
     }
 
     @Override
-    public Optional<User> getUserById(Integer id) {
+    public Optional<User> getById(Long id) {
         return Optional.ofNullable(users.get(id));
     }
 
     @Override
-    public List<User> getAllUsers() {
+    public List<User> getAll() {
         return new ArrayList<>(users.values());
     }
 
     @Override
-    public Optional<User> deleteUser(Integer id) {
-        return Optional.ofNullable(users.remove(id));
+    public void delete(Long id) {
+        users.remove(id);
     }
 }

@@ -1,11 +1,12 @@
 package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.Marker;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -21,22 +22,22 @@ public class UserController {
     }
 
     @GetMapping("{id}")
-    public UserDto getUserById(@PathVariable Integer id) {
+    public UserDto getUserById(@PathVariable Long id) {
         return userService.getUserById(id);
     }
 
     @PostMapping
-    public UserDto createUser(@Valid @NotNull @RequestBody UserDto userDto) {
+    public UserDto createUser(@Validated({Marker.OnCreate.class}) @NotNull @RequestBody UserDto userDto) {
         return userService.createUser(userDto);
     }
 
     @PatchMapping("/{id}")
-    public UserDto updateUser(@PathVariable Integer id, @Valid @NotNull @RequestBody UserDto userDto) {
+    public UserDto updateUser(@PathVariable Long id, @Validated(Marker.OnUpdate.class) @NotNull @RequestBody UserDto userDto) {
         return userService.updateUser(id, userDto);
     }
 
     @DeleteMapping("/{id}")
-    public UserDto deleteUser(@PathVariable Integer id) {
+    public UserDto deleteUser(@PathVariable Long id) {
         return userService.deleteUser(id);
     }
 }

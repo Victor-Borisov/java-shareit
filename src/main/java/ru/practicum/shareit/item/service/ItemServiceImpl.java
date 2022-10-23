@@ -1,11 +1,10 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exceptions.AccessForbiddenException;
+import ru.practicum.shareit.exceptions.ForbiddenException;
 import ru.practicum.shareit.exceptions.BadRequestException;
-import ru.practicum.shareit.exceptions.ObjectNotFoundException;
+import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.dao.ItemDao;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
@@ -18,7 +17,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
@@ -26,20 +24,16 @@ public class ItemServiceImpl implements ItemService {
     private final UserService userService;
 
     @Override
-    public List<ItemDto> getItemsByOwner(Integer ownerId) {
-        return itemRepository.getItemsByOwner(ownerId).stream()
+    public List<ItemDto> getItemsByOwner(Long ownerId) {
+        return itemRepository.getByOwner(ownerId).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public ItemDto getItemById(Integer itemId, Integer userId) {
-        Item item = itemRepository.getItemById(itemId)
-            .orElseThrow(() -> new ObjectNotFoundException("Item with id = " + itemId + " not found"));
-        //commented to pass test
-        /*if (!item.getOwner().equals(userId)) {
-            throw new AccessForbiddenException("Only owner can get the Item");
-        }*/
+    public ItemDto getItemById(Long itemId) {
+        Item item = itemRepository.getById(itemId)
+            .orElseThrow(() -> new NotFoundException("Item with id = " + itemId + " not found"));
         return ItemMapper.toItemDto(item);
     }
 
@@ -47,15 +41,14 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> searchItems(String query) {
         if (query.isEmpty() || query.isBlank()) {
             return Collections.emptyList();
-        } else {
-            return itemRepository.searchItems(query).stream()
+        }
+        return itemRepository.search(query).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
-        }
     }
 
     @Override
-    public ItemDto createItem(ItemDto itemDto, Integer ownerId) {
+    public ItemDto createItem(ItemDto itemDto, Long ownerId) {
         User owner = UserMapper.fromUserDto(userService.getUserById(ownerId));
         if (itemDto.getName() == null || itemDto.getName().isEmpty()) {
             throw new BadRequestException("Name can not be empty");
@@ -67,15 +60,15 @@ public class ItemServiceImpl implements ItemService {
             throw new BadRequestException("Available can not be empty");
         }
         Item item = ItemMapper.fromItemDto(itemDto, owner, null);
-        return ItemMapper.toItemDto(itemRepository.createItem(item));
+        return ItemMapper.toItemDto(itemRepository.create(item));
     }
 
     @Override
-    public ItemDto updateItem(Integer itemId, ItemDto itemDto, Integer userId) {
-        Item item = itemRepository.getItemById(itemId)
-            .orElseThrow(() -> new ObjectNotFoundException("Item with id = " + itemId + " not found"));
+    public ItemDto updateItem(ItemDto itemDto, Long itemId, Long userId) {
+        Item item = itemRepository.getById(itemId)
+            .orElseThrow(() -> new NotFoundException("Item with id = " + itemId + " not found"));
         if (!item.getOwner().getId().equals(userId)) {
-            throw new AccessForbiddenException("Only owner can edit the Item");
+            throw new ForbiddenException("Only owner can edit the Item");
         }
         if (itemDto.getName() != null) {
             item.setName(itemDto.getName());
@@ -86,13 +79,13 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
-        return ItemMapper.toItemDto(itemRepository.updateItem(itemId, item));
+        return ItemMapper.toItemDto(itemRepository.update(itemId, item));
     }
 
     @Override
-    public ItemDto deleteItem(Integer itemId, Integer userId) {
-        ItemDto itemDto = getItemById(itemId, userId);
-        itemRepository.deleteItem(itemId);
+    public ItemDto deleteItem(Long itemId, Long userId) {
+        ItemDto itemDto = getItemById(itemId);
+        itemRepository.delete(itemId);
         return itemDto;
     }
 

@@ -15,19 +15,19 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleObjectNotFoundException(ObjectNotFoundException e) {
+    public ErrorResponse handleObjectNotFoundException(NotFoundException e) {
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleForbiddenAccessException(AccessForbiddenException e) {
+    public ErrorResponse handleForbiddenAccessException(ForbiddenException e) {
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleValidationException(ValidationException e) {
+    public ErrorResponse handleValidationException(ConflictException e) {
         return new ErrorResponse(e.getMessage());
     }
 }
