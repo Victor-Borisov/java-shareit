@@ -58,6 +58,8 @@ public class UserServiceImpl implements UserService {
         userRepository.getAll().stream()
             .filter(user -> user.getEmail().equalsIgnoreCase(email))
             .findAny()
-            .ifPresent(s -> {throw new ConflictException("User with email = " + email + " already exists");});
+            .ifPresent(s -> {
+                throw new ConflictException("User with email = " + email + " already exists");
+            });
     }
 }
