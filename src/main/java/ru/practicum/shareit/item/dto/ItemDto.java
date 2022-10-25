@@ -12,12 +12,17 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class ItemDto {
     private Long id;
+
     @NotBlank(groups = {Marker.OnCreate.class})
     private String name;
+
     @NotBlank(groups = {Marker.OnCreate.class})
     private String description;
+
     @NotNull(groups = {Marker.OnCreate.class})
     private Boolean available;
+
     private User owner;
+
     private Long requestId;
 }

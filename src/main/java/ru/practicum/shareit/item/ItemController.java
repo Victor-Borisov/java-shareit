@@ -34,22 +34,20 @@ public class ItemController {
 
     @PostMapping
     public ItemDto createItem(@RequestHeader(HEADER_USER_ID) Long userId,
-        @Validated({Marker.OnCreate.class}) @NotNull @RequestBody ItemDto itemDto) {
+                              @Validated({Marker.OnCreate.class}) @NotNull @RequestBody ItemDto itemDto) {
         return itemService.createItem(itemDto, userId);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@RequestHeader(HEADER_USER_ID) Long userId,
-        @PathVariable Long itemId,
-        @Validated(Marker.OnUpdate.class) @NotNull @RequestBody ItemDto itemDto) {
+                              @PathVariable Long itemId,
+                              @Validated(Marker.OnUpdate.class) @NotNull @RequestBody ItemDto itemDto) {
         return itemService.updateItem(itemDto, itemId, userId);
     }
 
     @DeleteMapping("/{itemId}")
     public ItemDto deleteItem(@RequestHeader(HEADER_USER_ID) Long userId,
-        @PathVariable Long itemId) {
+                              @PathVariable Long itemId) {
         return itemService.deleteItem(itemId, userId);
     }
-
-
 }

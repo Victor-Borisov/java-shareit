@@ -26,14 +26,15 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getItemsByOwner(Long ownerId) {
         return itemRepository.getByOwner(ownerId).stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+                             .map(ItemMapper::toItemDto)
+                             .collect(Collectors.toList());
     }
 
     @Override
     public ItemDto getItemById(Long itemId) {
         Item item = itemRepository.getById(itemId)
-            .orElseThrow(() -> new NotFoundException("Item with id = " + itemId + " not found"));
+                                  .orElseThrow(() -> new NotFoundException("Item with id = " + itemId + " not found"));
+
         return ItemMapper.toItemDto(item);
     }
 
@@ -42,9 +43,10 @@ public class ItemServiceImpl implements ItemService {
         if (query.isEmpty() || query.isBlank()) {
             return Collections.emptyList();
         }
+
         return itemRepository.search(query).stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+                             .map(ItemMapper::toItemDto)
+                             .collect(Collectors.toList());
     }
 
     @Override
@@ -60,13 +62,14 @@ public class ItemServiceImpl implements ItemService {
             throw new BadRequestException("Available can not be empty");
         }
         Item item = ItemMapper.fromItemDto(itemDto, owner, null);
+
         return ItemMapper.toItemDto(itemRepository.create(item));
     }
 
     @Override
     public ItemDto updateItem(ItemDto itemDto, Long itemId, Long userId) {
         Item item = itemRepository.getById(itemId)
-            .orElseThrow(() -> new NotFoundException("Item with id = " + itemId + " not found"));
+                                  .orElseThrow(() -> new NotFoundException("Item with id = " + itemId + " not found"));
         if (!item.getOwner().getId().equals(userId)) {
             throw new ForbiddenException("Only owner can edit the Item");
         }
@@ -79,6 +82,7 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
+
         return ItemMapper.toItemDto(itemRepository.update(itemId, item));
     }
 
@@ -86,6 +90,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto deleteItem(Long itemId, Long userId) {
         ItemDto itemDto = getItemById(itemId);
         itemRepository.delete(itemId);
+
         return itemDto;
     }
 

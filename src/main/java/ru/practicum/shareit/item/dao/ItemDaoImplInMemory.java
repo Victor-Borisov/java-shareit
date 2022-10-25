@@ -38,17 +38,17 @@ public class ItemDaoImplInMemory implements ItemDao {
     @Override
     public List<Item> getByOwner(Long userId) {
         return items.values().stream()
-                .filter(item -> item.getOwner().getId().equals(userId))
-                .collect(Collectors.toList());
+                    .filter(item -> item.getOwner().getId().equals(userId))
+                    .collect(Collectors.toList());
     }
 
     @Override
     public List<Item> search(String searchText) {
         return items.values().stream()
-            .filter(Item::getAvailable)
-            .filter(item -> item.getName().toLowerCase().contains(searchText.toLowerCase()) ||
-                    item.getDescription().toLowerCase().contains(searchText.toLowerCase()))
-            .collect(Collectors.toList());
+                    .filter(Item::getAvailable)
+                    .filter(item -> item.getName().toLowerCase().contains(searchText.toLowerCase()) ||
+                            item.getDescription().toLowerCase().contains(searchText.toLowerCase()))
+                    .collect(Collectors.toList());
     }
 
     @Override
