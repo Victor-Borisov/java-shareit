@@ -46,6 +46,12 @@ public class UserDaoImplInMemory implements UserDao {
     }
 
     @Override
+    public boolean isExistedByEmail(String email, Long excludedId) {
+        return users.values().stream()
+                    .anyMatch(user -> user.getEmail().equalsIgnoreCase(email) && !user.getId().equals(excludedId));
+    }
+
+    @Override
     public void delete(Long id) {
         users.remove(id);
     }

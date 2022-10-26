@@ -9,4 +9,5 @@ public interface UserDao extends Dao<User> {
 
     List<User> getAll();
 
+    boolean isExistedByEmail(String email, Long excludedId);
 }
