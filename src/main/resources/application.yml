@@ -2,11 +2,17 @@ spring:
   sql:
     init:
       mode: always
+  datasource:
+    url: jdbc:h2:mem:shareit
+    driverClassName: org.h2.Driver
+    username: test
+    password: test
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+        format_sql: 'true'
   config:
     activate:
       on-profile: 'ci,test'
-  datasource:
-    driverClassName: org.h2.Driver
-    url: 'jdbc:h2:mem:shareit'
-    username: test
-    password: test
+
