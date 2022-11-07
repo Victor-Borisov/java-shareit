@@ -74,7 +74,7 @@ public class ItemServiceImpl implements ItemService {
         }
 
         @Override
-        public List<ItemDto> searchItems (String searchedText){
+        public List<ItemDto> searchItems(String searchedText) {
             if (searchedText.isEmpty() || searchedText.isBlank()) {
                 return Collections.emptyList();
             }
@@ -85,7 +85,7 @@ public class ItemServiceImpl implements ItemService {
         }
 
         @Override
-        public ItemDto createItem (ItemDto itemDto, Long ownerId){
+        public ItemDto createItem(ItemDto itemDto, Long ownerId) {
             User owner = UserMapper.fromUserDto(userService.getById(ownerId));
             Item item = ItemMapper.fromItemDto(itemDto, owner);
             item.setOwner(owner);
@@ -94,7 +94,7 @@ public class ItemServiceImpl implements ItemService {
         }
 
         @Override
-        public ItemDto updateItem (ItemDto itemDto, Long itemId, Long userId){
+        public ItemDto updateItem(ItemDto itemDto, Long itemId, Long userId) {
             Item item = itemRepository.findById(itemId)
                                       .orElseThrow(() -> new NotFoundException("Item not found"));
             if (!item.getOwner().getId().equals(userId)) {
@@ -108,7 +108,7 @@ public class ItemServiceImpl implements ItemService {
         }
 
         @Override
-        public ItemDto deleteItem (Long itemId, Long userId){
+        public ItemDto deleteItem(Long itemId, Long userId) {
             ItemDto itemDto = getItemById(itemId, userId);
             itemRepository.deleteById(itemId);
 
@@ -116,7 +116,7 @@ public class ItemServiceImpl implements ItemService {
         }
 
         @Override
-        public CommentDto createComment (Long itemId, Long userId, CommentDto commentDto){
+        public CommentDto createComment(Long itemId, Long userId, CommentDto commentDto) {
             User user = UserMapper.fromUserDto(userService.getById(userId));
             ItemDto itemDto = getItemById(itemId, userId);
             Item item = ItemMapper.fromItemDto(itemDto, user);
