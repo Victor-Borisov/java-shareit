@@ -3,10 +3,11 @@ package ru.practicum.shareit.booking.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dao.BookingDao;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
-import ru.practicum.shareit.booking.dto.BookingShortDto;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exceptions.BadRequestException;
 import ru.practicum.shareit.exceptions.NotFoundException;
@@ -38,21 +39,22 @@ public class BookingServiceImpl implements BookingService {
     private final Sort sort = Sort.by(Sort.Direction.DESC, "start");
 
     @Override
-    public BookingDto create(BookingShortDto bookingShortDto, Long userId) {
+    @Transactional
+    public BookingDto create(BookingRequestDto bookingRequestDto, Long userId) {
         userService.getById(userId);
-        itemService.getItemById(bookingShortDto.getItemId(), userId);
+        itemService.getById(bookingRequestDto.getItemId(), userId);
         Optional<User> user = userRepository.findById(userId);
-        Optional<Item> item = itemRepository.findById(bookingShortDto.getItemId());
+        Optional<Item> item = itemRepository.findById(bookingRequestDto.getItemId());
         if (item.isPresent() && item.get().getOwner().getId().equals(userId)) {
             throw new NotFoundException("User can not book own item");
         }
         if (item.isPresent() && !item.get().getAvailable()) {
             throw new BadRequestException("User can book only available item");
         }
-        if (bookingShortDto.getEnd().isBefore(bookingShortDto.getStart())) {
+        if (bookingRequestDto.getEnd().isBefore(bookingRequestDto.getStart())) {
             throw new BadRequestException("End date can not be earlier start date");
         }
-        Booking booking = BookingMapper.fromBookingShortDto(bookingShortDto);
+        Booking booking = BookingMapper.fromBookingShortDto(bookingRequestDto);
         booking.setBooker(user.orElse(null));
         booking.setItem(item.orElse(null));
         booking.setStatus(WAITING);
@@ -62,6 +64,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public BookingDto approve(Long bookingId, Long userId, Boolean approved) {
         userService.getById(userId);
         Booking booking = bookingRepository.findById(bookingId)
@@ -83,6 +86,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookingDto> getAllByOwner(Long userId, String state) {
         userService.getById(userId);
         List<Booking> bookingDtoList = new ArrayList<>();
@@ -116,6 +120,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookingDto> getAllByUser(Long userId, String state) {
         userService.getById(userId);
         List<Booking> bookingDtoList = new ArrayList<>();
@@ -148,6 +153,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BookingDto getById(Long bookingId, Long userId) {
         Booking booking = bookingRepository.findById(bookingId)
                                            .orElseThrow(() -> new NotFoundException("Booking not found"));

@@ -7,11 +7,16 @@ import ru.practicum.shareit.booking.model.Booking;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface BookingDao extends JpaRepository<Booking, Long> {
-    List<Booking> findAllByItemIdOrderByStartAsc(Long itemId);
+    Optional<Booking> findTopByItemIdAndEndBeforeAndStatusInOrderByEndDesc(Long itemId,
+                                                                                 LocalDateTime finishBefore,
+                                                                                 List<StatusType> statuses);
 
-    List<Booking> findAllByItemIdOrderByStartDesc(Long itemId);
+    Optional<Booking> findTopByItemIdAndStartAfterAndStatusInOrderByStartAsc(Long itemId,
+                                                                             LocalDateTime startAfter,
+                                                                             List<StatusType> statuses);
 
     List<Booking> findAllByBookerIdAndItemIdAndStatusEqualsAndEndIsBefore(Long bookerId, Long itemId,
                                                                           StatusType status, LocalDateTime end);
