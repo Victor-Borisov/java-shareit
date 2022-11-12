@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import ru.practicum.shareit.booking.dto.BookingDto;
 
 import java.util.List;
 
@@ -17,27 +16,34 @@ public class ItemDto {
 
     private Boolean available;
 
-    private ItemRequestShort request;
+    private ItemRequestTiny request;
 
-    private Owner owner;
+    private OwnerTiny owner;
 
-    private BookingDto lastBooking;
+    private BookingTiny lastBooking;
 
-    private BookingDto nextBooking;
+    private BookingTiny nextBooking;
 
     private List<CommentDto> comments;
 
     @Data
     @Builder
-    public static class Owner {
+    public static class ItemRequestTiny {
+        private final long id;
+        private final String description;
+    }
+
+    @Data
+    @Builder
+    public static class OwnerTiny {
         private final long id;
         private final String name;
     }
 
     @Data
     @Builder
-    public static class ItemRequestShort {
-        private final long id;
-        private final String description;
+    public static class BookingTiny {
+        private Long id;
+        private Long bookerId;
     }
 }

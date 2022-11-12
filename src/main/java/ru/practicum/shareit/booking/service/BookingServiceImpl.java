@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.StatusType;
 import ru.practicum.shareit.booking.dao.BookingDao;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
@@ -21,7 +22,6 @@ import ru.practicum.shareit.user.service.UserService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.booking.StatusType.*;
@@ -33,7 +33,6 @@ public class BookingServiceImpl implements BookingService {
 
     private final UserService userService;
     private final UserDao userRepository;
-    private final ItemService itemService;
     private final ItemDao itemRepository;
 
     private final Sort sort = Sort.by(Sort.Direction.DESC, "start");
@@ -41,22 +40,19 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDto create(BookingRequestDto bookingRequestDto, Long userId) {
-        userService.getById(userId);
-        itemService.getById(bookingRequestDto.getItemId(), userId);
-        Optional<User> user = userRepository.findById(userId);
-        Optional<Item> item = itemRepository.findById(bookingRequestDto.getItemId());
-        if (item.isPresent() && item.get().getOwner().getId().equals(userId)) {
+        User user = userRepository.findById(userId)
+                                  .orElseThrow(() -> new NotFoundException("User not found"));
+        Item item = itemRepository.findById(bookingRequestDto.getItemId())
+                                  .orElseThrow(() -> new NotFoundException("Item not found"));
+        if (item.getOwner().getId().equals(userId)) {
             throw new NotFoundException("User can not book own item");
         }
-        if (item.isPresent() && !item.get().getAvailable()) {
+        if (!item.getAvailable()) {
             throw new BadRequestException("User can book only available item");
         }
-        if (bookingRequestDto.getEnd().isBefore(bookingRequestDto.getStart())) {
-            throw new BadRequestException("End date can not be earlier start date");
-        }
         Booking booking = BookingMapper.fromBookingShortDto(bookingRequestDto);
-        booking.setBooker(user.orElse(null));
-        booking.setItem(item.orElse(null));
+        booking.setBooker(user);
+        booking.setItem(item);
         booking.setStatus(WAITING);
         bookingRepository.save(booking);
 
@@ -87,29 +83,29 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingDto> getAllByOwner(Long userId, String state) {
+    public List<BookingDto> getAllByOwner(Long userId, StatusType state) {
         userService.getById(userId);
         List<Booking> bookingDtoList = new ArrayList<>();
         switch (state) {
-            case "ALL":
+            case ALL:
                 bookingDtoList.addAll(bookingRepository.findAllByItemOwnerId(userId, sort));
                 break;
-            case "CURRENT":
+            case CURRENT:
                 bookingDtoList.addAll(bookingRepository.findAllByItemOwnerIdAndStartBeforeAndEndAfter(userId,
                         LocalDateTime.now(), LocalDateTime.now(), sort));
                 break;
-            case "PAST":
+            case PAST:
                 bookingDtoList.addAll(bookingRepository.findAllByItemOwnerIdAndEndBefore(userId,
                         LocalDateTime.now(), sort));
                 break;
-            case "FUTURE":
+            case FUTURE:
                 bookingDtoList.addAll(bookingRepository.findAllByItemOwnerIdAndStartAfter(userId,
                         LocalDateTime.now(), sort));
                 break;
-            case "WAITING":
+            case WAITING:
                 bookingDtoList.addAll(bookingRepository.findAllByItemOwnerIdAndStatusEquals(userId, WAITING, sort));
                 break;
-            case "REJECTED":
+            case REJECTED:
                 bookingDtoList.addAll(bookingRepository.findAllByItemOwnerIdAndStatusEquals(userId, REJECTED, sort));
                 break;
             default:
@@ -121,28 +117,29 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingDto> getAllByUser(Long userId, String state) {
+    public List<BookingDto> getAllByUser(Long userId, StatusType state) {
         userService.getById(userId);
         List<Booking> bookingDtoList = new ArrayList<>();
         switch (state) {
-            case "ALL":
+            case ALL:
                 bookingDtoList.addAll(bookingRepository.findAllByBookerId(userId, sort));
                 break;
-            case "CURRENT":
+            case CURRENT:
                 bookingDtoList.addAll(bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(userId,
                         LocalDateTime.now(), LocalDateTime.now(), sort));
                 break;
-            case "PAST":
+            case PAST:
                 bookingDtoList.addAll(bookingRepository.findAllByBookerIdAndEndBefore(userId,
                         LocalDateTime.now(), sort));
                 break;
-            case "FUTURE":
-                bookingDtoList.addAll(bookingRepository.findAllByBookerIdAndStartAfter(userId, LocalDateTime.now(), sort));
+            case FUTURE:
+                bookingDtoList.addAll(bookingRepository.findAllByBookerIdAndStartAfter(userId,
+                        LocalDateTime.now(), sort));
                 break;
-            case "WAITING":
+            case WAITING:
                 bookingDtoList.addAll(bookingRepository.findAllByBookerIdAndStatusEquals(userId, WAITING, sort));
                 break;
-            case "REJECTED":
+            case REJECTED:
                 bookingDtoList.addAll(bookingRepository.findAllByBookerIdAndStatusEquals(userId, REJECTED, sort));
                 break;
             default:

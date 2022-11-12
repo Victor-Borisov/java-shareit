@@ -31,6 +31,7 @@ public class UserServiceImpl implements UserService {
     public UserDto getById(Long id) {
         User user = userRepository.findById(id)
                                   .orElseThrow(() -> new NotFoundException("User not found"));
+
         return UserMapper.toUserDto(user);
     }
 
@@ -38,16 +39,20 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto create(UserDto userDto) {
         User user = userRepository.save(UserMapper.fromUserDto(userDto));
+
         return UserMapper.toUserDto(user);
     }
 
     @Override
     @Transactional
     public UserDto update(Long id, UserDto userDto) {
-        UserDto userDtoExisted = getById(id);
-        Optional.ofNullable(userDto.getEmail()).ifPresent(userDtoExisted::setEmail);
-        Optional.ofNullable(userDto.getName()).ifPresent(userDtoExisted::setName);
-        User user = userRepository.save(UserMapper.fromUserDto(userDtoExisted));
+        User user = userRepository.findById(id)
+                                  .orElseThrow(() -> new NotFoundException("User not found"));
+        Optional.ofNullable(userDto.getEmail())
+                .ifPresent(v -> user.setEmail(v.replaceAll("\\s+","")));
+        Optional.ofNullable(userDto.getName())
+                .ifPresent(v -> user.setName(v.replaceAll("\\s+","")));
+
         return UserMapper.toUserDto(user);
     }
 
@@ -56,6 +61,7 @@ public class UserServiceImpl implements UserService {
     public UserDto delete(Long id) {
         UserDto userDto = getById(id);
         userRepository.deleteById(id);
+
         return userDto;
     }
 }

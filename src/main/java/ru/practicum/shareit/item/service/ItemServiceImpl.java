@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.StatusType;
 import ru.practicum.shareit.booking.dao.BookingDao;
 import ru.practicum.shareit.booking.dto.BookingMapper;
+import ru.practicum.shareit.booking.dto.LastNextBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exceptions.ForbiddenException;
 import ru.practicum.shareit.exceptions.BadRequestException;
@@ -41,15 +42,26 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> getByOwner(Long ownerId) {
         List<ItemDto> itemDtoList = itemRepository.findAllByOwnerId(ownerId).stream()
                                                   .map(ItemMapper::toItemDto).collect(Collectors.toList());
+        List<Long> items = itemDtoList.stream().map(ItemDto::getId).collect(Collectors.toList());
+        List<LastNextBookingDto> findLastNextBooking = bookingRepository.findLastNextBooking(items);
         itemDtoList.forEach(itemDto -> {
-            Booking lastBooking =
-                    bookingRepository.findTopByItemIdAndEndBeforeAndStatusInOrderByEndDesc(itemDto.getId(),
-                            LocalDateTime.now(), List.of(StatusType.APPROVED)).orElse(null);
-            Booking nextBooking =
-                    bookingRepository.findTopByItemIdAndStartAfterAndStatusInOrderByStartAsc(itemDto.getId(),
-                            LocalDateTime.now(), List.of(StatusType.APPROVED)).orElse(null);
-            itemDto.setLastBooking(lastBooking == null ? null : BookingMapper.toBookingDto(lastBooking));
-            itemDto.setNextBooking(nextBooking == null ? null : BookingMapper.toBookingDto(nextBooking));
+            LastNextBookingDto lastNextBookingDto = findLastNextBooking
+                    .stream()
+                    .filter(o -> o.getItemId().equals(itemDto.getId()))
+                    .collect(Collectors.toList()).get(0);
+
+            ItemDto.BookingTiny lastBooking = ItemDto.BookingTiny
+                    .builder()
+                    .id(lastNextBookingDto.getLastBookingId())
+                    .bookerId(lastNextBookingDto.getLastBookingBookerId())
+                    .build();
+            ItemDto.BookingTiny nextBooking = ItemDto.BookingTiny
+                    .builder()
+                    .id(lastNextBookingDto.getNextBookingId())
+                    .bookerId(lastNextBookingDto.getNextBookingBookerId())
+                    .build();
+            itemDto.setLastBooking(lastBooking.getId() == 0 ? null : lastBooking);
+            itemDto.setNextBooking(nextBooking.getId() == 0 ? null : nextBooking);
 
             itemDto.setComments(commentRepository.findAllByItemId(itemDto.getId())
                                                  .stream()
@@ -74,8 +86,8 @@ public class ItemServiceImpl implements ItemService {
             Booking nextBooking =
                     bookingRepository.findTopByItemIdAndStartAfterAndStatusInOrderByStartAsc(itemId,
                             LocalDateTime.now(), List.of(StatusType.APPROVED)).orElse(null);
-            itemDto.setLastBooking(lastBooking == null ? null : BookingMapper.toBookingDto(lastBooking));
-            itemDto.setNextBooking(nextBooking == null ? null : BookingMapper.toBookingDto(nextBooking));
+            itemDto.setLastBooking(lastBooking == null ? null : BookingMapper.toBookingTiny(lastBooking));
+            itemDto.setNextBooking(nextBooking == null ? null : BookingMapper.toBookingTiny(nextBooking));
         }
 
             return itemDto;
@@ -115,7 +127,7 @@ public class ItemServiceImpl implements ItemService {
             Optional.ofNullable(itemDto.getDescription()).ifPresent(item::setDescription);
             Optional.ofNullable(itemDto.getAvailable()).ifPresent(item::setAvailable);
 
-            return ItemMapper.toItemDto(itemRepository.save(item));
+            return ItemMapper.toItemDto(item);
         }
 
         @Override

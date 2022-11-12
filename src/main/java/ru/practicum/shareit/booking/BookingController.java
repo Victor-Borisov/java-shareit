@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exceptions.BadRequestException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -19,6 +20,10 @@ public class BookingController {
     @PostMapping
     public BookingDto create(@Valid @RequestBody BookingRequestDto bookingRequestDto,
                              @RequestHeader("X-Sharer-User-Id") Long userId) {
+        if (!bookingRequestDto.getEnd().isAfter(bookingRequestDto.getStart())) {
+            throw new BadRequestException("End date can not be earlier start date");
+        }
+
         return bookingService.create(bookingRequestDto, userId);
     }
 
@@ -31,13 +36,27 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingDto> getAllByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
                                           @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getAllByOwner(userId, state);
+        StatusType statusType;
+        try {
+            statusType = StatusType.valueOf(state);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Unknown state: " + state);
+        }
+
+        return bookingService.getAllByOwner(userId, statusType);
     }
 
     @GetMapping
     public List<BookingDto> getAllByUser(@RequestHeader("X-Sharer-User-Id") Long userId,
                                          @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getAllByUser(userId, state);
+        StatusType statusType;
+        try {
+            statusType = StatusType.valueOf(state);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Unknown state: " + state);
+        }
+
+        return bookingService.getAllByUser(userId, statusType);
     }
 
     @GetMapping("/{bookingId}")
