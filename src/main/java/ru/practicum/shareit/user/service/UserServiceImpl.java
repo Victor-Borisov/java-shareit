@@ -48,10 +48,10 @@ public class UserServiceImpl implements UserService {
     public UserDto update(Long id, UserDto userDto) {
         User user = userRepository.findById(id)
                                   .orElseThrow(() -> new NotFoundException("User not found"));
-        if(!StringUtils.isBlank(userDto.getEmail())) {
+        if (!StringUtils.isBlank(userDto.getEmail())) {
             user.setEmail(userDto.getEmail());
         }
-        if(!StringUtils.isBlank(userDto.getName())) {
+        if (!StringUtils.isBlank(userDto.getName())) {
             user.setName(userDto.getName());
         }
 

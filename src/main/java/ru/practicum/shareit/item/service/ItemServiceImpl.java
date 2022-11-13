@@ -125,10 +125,10 @@ public class ItemServiceImpl implements ItemService {
         if (!item.getOwner().getId().equals(userId)) {
             throw new ForbiddenException("Only owner can edit the Item");
         }
-        if(!StringUtils.isBlank(itemDto.getName())) {
+        if (!StringUtils.isBlank(itemDto.getName())) {
             item.setName(itemDto.getName());
         }
-        if(!StringUtils.isBlank(itemDto.getDescription())) {
+        if (!StringUtils.isBlank(itemDto.getDescription())) {
             item.setDescription(itemDto.getDescription());
         }
         Optional.ofNullable(itemDto.getAvailable()).ifPresent(item::setAvailable);
