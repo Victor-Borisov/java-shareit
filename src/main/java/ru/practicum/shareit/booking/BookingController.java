@@ -16,7 +16,6 @@ import java.util.List;
 public class BookingController {
     private final BookingService bookingService;
 
-
     @PostMapping
     public BookingDto create(@Valid @RequestBody BookingRequestDto bookingRequestDto,
                              @RequestHeader("X-Sharer-User-Id") Long userId) {
@@ -36,27 +35,13 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingDto> getAllByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
                                           @RequestParam(defaultValue = "ALL") String state) {
-        StatusType statusType;
-        try {
-            statusType = StatusType.valueOf(state);
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Unknown state: " + state);
-        }
-
-        return bookingService.getAllByOwner(userId, statusType);
+        return bookingService.getAllByOwner(userId, StatusType.getEnumByString(state));
     }
 
     @GetMapping
     public List<BookingDto> getAllByUser(@RequestHeader("X-Sharer-User-Id") Long userId,
                                          @RequestParam(defaultValue = "ALL") String state) {
-        StatusType statusType;
-        try {
-            statusType = StatusType.valueOf(state);
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Unknown state: " + state);
-        }
-
-        return bookingService.getAllByUser(userId, statusType);
+        return bookingService.getAllByUser(userId, StatusType.getEnumByString(state));
     }
 
     @GetMapping("/{bookingId}")

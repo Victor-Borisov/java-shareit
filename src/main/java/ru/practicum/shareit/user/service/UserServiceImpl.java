@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.NotFoundException;
@@ -10,7 +11,6 @@ import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,10 +48,8 @@ public class UserServiceImpl implements UserService {
     public UserDto update(Long id, UserDto userDto) {
         User user = userRepository.findById(id)
                                   .orElseThrow(() -> new NotFoundException("User not found"));
-        Optional.ofNullable(userDto.getEmail())
-                .ifPresent(v -> user.setEmail(v.replaceAll("\\s+","")));
-        Optional.ofNullable(userDto.getName())
-                .ifPresent(v -> user.setName(v.replaceAll("\\s+","")));
+        if(!StringUtils.isBlank(userDto.getEmail())) user.setEmail(userDto.getEmail());
+        if(!StringUtils.isBlank(userDto.getName())) user.setName(userDto.getName());
 
         return UserMapper.toUserDto(user);
     }

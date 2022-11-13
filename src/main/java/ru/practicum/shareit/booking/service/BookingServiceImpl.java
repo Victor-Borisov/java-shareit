@@ -19,7 +19,6 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -75,7 +74,6 @@ public class BookingServiceImpl implements BookingService {
         } else {
             booking.setStatus(REJECTED);
         }
-        bookingRepository.save(booking);
 
         return BookingMapper.toBookingDto(booking);
     }
@@ -84,28 +82,28 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     public List<BookingDto> getAllByOwner(Long userId, StatusType state) {
         userService.getById(userId);
-        List<Booking> bookingDtoList = new ArrayList<>();
+        final List<Booking> bookingDtoList;
         switch (state) {
             case ALL:
-                bookingDtoList.addAll(bookingRepository.findAllByItemOwnerId(userId, sort));
+                bookingDtoList = bookingRepository.findAllByItemOwnerId(userId, sort);
                 break;
             case CURRENT:
-                bookingDtoList.addAll(bookingRepository.findAllByItemOwnerIdAndStartBeforeAndEndAfter(userId,
-                        LocalDateTime.now(), LocalDateTime.now(), sort));
+                bookingDtoList = bookingRepository.findAllByItemOwnerIdAndStartBeforeAndEndAfter(userId,
+                        LocalDateTime.now(), LocalDateTime.now(), sort);
                 break;
             case PAST:
-                bookingDtoList.addAll(bookingRepository.findAllByItemOwnerIdAndEndBefore(userId,
-                        LocalDateTime.now(), sort));
+                bookingDtoList = bookingRepository.findAllByItemOwnerIdAndEndBefore(userId,
+                        LocalDateTime.now(), sort);
                 break;
             case FUTURE:
-                bookingDtoList.addAll(bookingRepository.findAllByItemOwnerIdAndStartAfter(userId,
-                        LocalDateTime.now(), sort));
+                bookingDtoList = bookingRepository.findAllByItemOwnerIdAndStartAfter(userId,
+                        LocalDateTime.now(), sort);
                 break;
             case WAITING:
-                bookingDtoList.addAll(bookingRepository.findAllByItemOwnerIdAndStatusEquals(userId, WAITING, sort));
+                bookingDtoList = bookingRepository.findAllByItemOwnerIdAndStatusEquals(userId, WAITING, sort);
                 break;
             case REJECTED:
-                bookingDtoList.addAll(bookingRepository.findAllByItemOwnerIdAndStatusEquals(userId, REJECTED, sort));
+                bookingDtoList = bookingRepository.findAllByItemOwnerIdAndStatusEquals(userId, REJECTED, sort);
                 break;
             default:
                 throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
@@ -118,28 +116,28 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     public List<BookingDto> getAllByUser(Long userId, StatusType state) {
         userService.getById(userId);
-        List<Booking> bookingDtoList = new ArrayList<>();
+        final List<Booking> bookingDtoList;
         switch (state) {
             case ALL:
-                bookingDtoList.addAll(bookingRepository.findAllByBookerId(userId, sort));
+                bookingDtoList = bookingRepository.findAllByBookerId(userId, sort);
                 break;
             case CURRENT:
-                bookingDtoList.addAll(bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(userId,
-                        LocalDateTime.now(), LocalDateTime.now(), sort));
+                bookingDtoList = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(userId,
+                        LocalDateTime.now(), LocalDateTime.now(), sort);
                 break;
             case PAST:
-                bookingDtoList.addAll(bookingRepository.findAllByBookerIdAndEndBefore(userId,
-                        LocalDateTime.now(), sort));
+                bookingDtoList = bookingRepository.findAllByBookerIdAndEndBefore(userId,
+                        LocalDateTime.now(), sort);
                 break;
             case FUTURE:
-                bookingDtoList.addAll(bookingRepository.findAllByBookerIdAndStartAfter(userId,
-                        LocalDateTime.now(), sort));
+                bookingDtoList = bookingRepository.findAllByBookerIdAndStartAfter(userId,
+                        LocalDateTime.now(), sort);
                 break;
             case WAITING:
-                bookingDtoList.addAll(bookingRepository.findAllByBookerIdAndStatusEquals(userId, WAITING, sort));
+                bookingDtoList = bookingRepository.findAllByBookerIdAndStatusEquals(userId, WAITING, sort);
                 break;
             case REJECTED:
-                bookingDtoList.addAll(bookingRepository.findAllByBookerIdAndStatusEquals(userId, REJECTED, sort));
+                bookingDtoList = bookingRepository.findAllByBookerIdAndStatusEquals(userId, REJECTED, sort);
                 break;
             default:
                 throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
