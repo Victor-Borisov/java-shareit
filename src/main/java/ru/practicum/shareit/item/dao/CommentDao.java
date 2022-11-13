@@ -9,5 +9,6 @@ import java.util.List;
 
 public interface CommentDao extends JpaRepository<Comment, Long> {
     List<Comment> findAllByItemId(Long itemId);
+
     List<Comment> findAllByItemIn(List<Item> items, Sort sort);
 }
