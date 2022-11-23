@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface ItemDao extends JpaRepository<Item, Long>, ItemCustomDao {
     List<Item> findAllByOwnerId(Long ownerId, PageRequest pageRequest);
+
     List<Item> findAllByRequestId(Long requestId);
 }
