@@ -16,6 +16,7 @@ import ru.practicum.shareit.item.dto.ItemInDto;
 import ru.practicum.shareit.user.UserController;
 import ru.practicum.shareit.user.dto.UserDto;
 
+import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -66,7 +67,7 @@ public class BookingControllerTests {
 
         bookingInDto = BookingRequestDto
                 .builder()
-                .start(LocalDateTime.of(2022, 10, 24, 12, 30))
+                .start(LocalDateTime.of(2023, 10, 24, 12, 30))
                 .end(LocalDateTime.of(2023, 11, 10, 13, 0))
                 .itemId(1L).build();
     }
@@ -113,7 +114,7 @@ public class BookingControllerTests {
         ItemDto item = itemController.create(user.getId(), itemInDto);
         UserDto user1 = userController.create(userDto1);
         bookingInDto.setEnd(LocalDateTime.of(2022, 9, 24, 12, 30));
-        assertThrows(BadRequestException.class, () -> bookingController.create(bookingInDto, user1.getId()));
+        assertThrows(ConstraintViolationException.class, () -> bookingController.create(bookingInDto, user1.getId()));
     }
 
     @Test
@@ -123,8 +124,8 @@ public class BookingControllerTests {
         UserDto user1 = userController.create(userDto1);
         BookingDto booking = bookingController.create(BookingRequestDto
                 .builder()
-                .start(LocalDateTime.of(2022, 10, 24, 12, 30))
-                .end(LocalDateTime.of(2022, 11, 10, 13, 0))
+                .start(LocalDateTime.of(2023, 10, 24, 12, 30))
+                .end(LocalDateTime.of(2023, 11, 10, 13, 0))
                 .itemId(item.getId()).build(), user1.getId());
         assertEquals(WAITING, bookingController.getById(booking.getId(), user1.getId()).getStatus());
         bookingController.approve(booking.getId(), user.getId(), true);
@@ -164,14 +165,14 @@ public class BookingControllerTests {
         assertEquals(1, bookingController.getAllByUser(user1.getId(), "WAITING", 0, 10).size());
         assertEquals(1, bookingController.getAllByUser(user1.getId(), "ALL", 0, 10).size());
         assertEquals(0, bookingController.getAllByUser(user1.getId(), "PAST", 0, 10).size());
-        assertEquals(1, bookingController.getAllByUser(user1.getId(), "CURRENT", 0, 10).size());
-        assertEquals(0, bookingController.getAllByUser(user1.getId(), "FUTURE", 0, 10).size());
+        assertEquals(0, bookingController.getAllByUser(user1.getId(), "CURRENT", 0, 10).size());
+        assertEquals(1, bookingController.getAllByUser(user1.getId(), "FUTURE", 0, 10).size());
         assertEquals(0, bookingController.getAllByUser(user1.getId(), "REJECTED", 0, 10).size());
         bookingController.approve(booking.getId(), user.getId(), true);
-        assertEquals(1, bookingController.getAllByOwner(user.getId(), "CURRENT", 0, 10).size());
+        assertEquals(0, bookingController.getAllByOwner(user.getId(), "CURRENT", 0, 10).size());
         assertEquals(1, bookingController.getAllByOwner(user.getId(), "ALL", 0, 10).size());
         assertEquals(0, bookingController.getAllByOwner(user.getId(), "WAITING", 0, 10).size());
-        assertEquals(0, bookingController.getAllByOwner(user.getId(), "FUTURE", 0, 10).size());
+        assertEquals(1, bookingController.getAllByOwner(user.getId(), "FUTURE", 0, 10).size());
         assertEquals(0, bookingController.getAllByOwner(user.getId(), "REJECTED", 0, 10).size());
         assertEquals(0, bookingController.getAllByOwner(user.getId(), "PAST", 0, 10).size());
     }

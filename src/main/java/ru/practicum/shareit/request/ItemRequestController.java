@@ -1,16 +1,18 @@
 package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exceptions.BadRequestException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Validated
 @RequestMapping(path = "/requests")
 public class ItemRequestController {
     private final ItemRequestService itemRequestService;
@@ -27,15 +29,11 @@ public class ItemRequestController {
     }
 
     @GetMapping("/all")
-    public List<ItemRequestDto> getAll(@RequestParam(defaultValue = "0") int from,
-                                       @RequestParam(defaultValue = "10") int size,
+    public List<ItemRequestDto> getAll(@RequestParam(defaultValue = "0")
+                                       @Min(value = 0, message = "Parameter from must not be negative") int from,
+                                       @RequestParam(defaultValue = "10")
+                                       @Min(value = 1, message = "Parameter size must be positive") int size,
                                        @RequestHeader("X-Sharer-User-Id") Long userId) {
-        if (from < 0) {
-            throw new BadRequestException("Parameter from must not be negative");
-        }
-        if (size <= 0) {
-            throw new BadRequestException("Parameter size must be positive");
-        }
         return itemRequestService.getAll(from, size, userId);
     }
 

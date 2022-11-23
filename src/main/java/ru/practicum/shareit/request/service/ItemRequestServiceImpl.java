@@ -5,6 +5,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.item.dao.ItemDao;
+import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.dao.ItemRequestDao;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -15,9 +18,12 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 import static ru.practicum.shareit.request.dto.ItemRequestMapper.fromItemRequestDto;
 import static ru.practicum.shareit.request.dto.ItemRequestMapper.toItemRequestDto;
 
@@ -25,8 +31,8 @@ import static ru.practicum.shareit.request.dto.ItemRequestMapper.toItemRequestDt
 @RequiredArgsConstructor
 public class ItemRequestServiceImpl implements ItemRequestService {
     private final UserService userService;
-
     private final ItemService itemService;
+    private final ItemDao itemRepository;
     private final ItemRequestDao itemRequestRepository;
 
     @Transactional
@@ -45,28 +51,20 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestDto> getAllByUser(Long userId) {
         userService.getById(userId);
-        List<ItemRequestDto> itemRequestDtoList = itemRequestRepository
-                .findAllByRequestorIdOrderByCreatedAsc(userId)
-                .stream()
-                .map(ItemRequestMapper::toItemRequestDto)
-                .collect(Collectors.toList());
-        itemRequestDtoList.forEach(this::setItemsToItemRequestDto);
+        List<ItemRequest> itemRequestList = itemRequestRepository
+                .findAllByRequestorIdOrderByCreatedAsc(userId);
 
-        return itemRequestDtoList;
+        return(getItemRequestDtoList(itemRequestList));
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<ItemRequestDto> getAll(int from, int size, Long userId) {
         userService.getById(userId);
-        List<ItemRequestDto> itemRequestDtoList = itemRequestRepository
-                .findAllByRequestorIdNotLikeOrderByCreatedAsc(userId, PageRequest.of(from, size))
-                .stream()
-                .map(ItemRequestMapper::toItemRequestDto)
-                .collect(Collectors.toList());
-        itemRequestDtoList.forEach(this::setItemsToItemRequestDto);
+        List<ItemRequest> itemRequestList = itemRequestRepository
+                .findAllByRequestorIdNotLikeOrderByCreatedAsc(userId, PageRequest.of(from, size));
 
-        return itemRequestDtoList;
+        return(getItemRequestDtoList(itemRequestList));
     }
 
     @Transactional(readOnly = true)
@@ -77,12 +75,23 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 .findById(requestId)
                 .orElseThrow(() -> new NotFoundException("ItemRequest not found"));
         ItemRequestDto itemRequestDto = toItemRequestDto(itemRequest);
-        setItemsToItemRequestDto(itemRequestDto);
+        itemRequestDto.setItems(itemService.findAllByRequestId(itemRequestDto.getId()));
 
         return itemRequestDto;
     }
 
-    private void setItemsToItemRequestDto(ItemRequestDto itemRequestDto) {
-        itemRequestDto.setItems(itemService.findAllByRequestId(itemRequestDto.getId()));
+    private List<ItemRequestDto> getItemRequestDtoList(List<ItemRequest> itemRequestList) {
+        Map<ItemRequest, List<Item>> items = itemRepository
+                .findAllByRequestIn(itemRequestList)
+                .stream().collect(groupingBy(Item::getRequest, toList()));
+
+        return itemRequestList.stream().map(itemRequest -> {
+            ItemRequestDto itemRequestDto = ItemRequestMapper.toItemRequestDto(itemRequest);
+            List<Item> itemList = items.get(itemRequest);
+            itemRequestDto.setItems(itemList == null ? Collections.emptyList() : itemList
+                    .stream().map(ItemMapper::toItemDto).collect(toList()));
+
+            return itemRequestDto;
+        }).collect(toList());
     }
 }

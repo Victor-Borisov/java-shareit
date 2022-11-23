@@ -1,12 +1,12 @@
 package ru.practicum.shareit.bookingtests;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.booking.StatusType;
 import ru.practicum.shareit.booking.dao.BookingDao;
 import ru.practicum.shareit.booking.model.Booking;
@@ -23,7 +23,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static ru.practicum.shareit.booking.StatusType.APPROVED;
 
 @DataJpaTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class BookingRepositoryTests {
     @Autowired
     private BookingDao bookingRepository;
@@ -72,6 +71,13 @@ public class BookingRepositoryTests {
                          .build();
 
         sort = Sort.by(Sort.Direction.DESC, "start");
+    }
+
+    @AfterEach
+    void tearDown() {
+        bookingRepository.deleteAll();
+        itemRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test

@@ -1,10 +1,10 @@
 package ru.practicum.shareit.itemrequesttests;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.request.dao.ItemRequestDao;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.dao.UserDao;
@@ -17,13 +17,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 @DataJpaTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ItemRequestRepositoryTests {
     @Autowired
     private ItemRequestDao itemRequestRepository;
 
     @Autowired
     private UserDao userRepository;
+
+    @AfterEach
+    void tearDown() {
+        itemRequestRepository.deleteAll();
+        userRepository.deleteAll();
+    }
 
     @Test
     void findAllByRequestorIdOrderByCreatedAscTest() {

@@ -103,7 +103,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public List<ItemDto> search(String searchedText, int from, int size) {
-        if (searchedText.isEmpty() || searchedText.isBlank()) {
+        if (searchedText.isBlank()) {
             return Collections.emptyList();
         }
         List<Item> allItems = itemRepository.findAllByCriteria(searchedText, PageRequest.of(from, size));

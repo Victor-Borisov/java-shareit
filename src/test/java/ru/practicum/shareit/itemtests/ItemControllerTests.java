@@ -19,8 +19,10 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.user.UserController;
 import ru.practicum.shareit.user.dto.UserDto;
 
+import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -165,20 +167,21 @@ public class ItemControllerTests {
 
     @Test
     void searchWithWrongFrom() {
-        assertThrows(BadRequestException.class, () -> itemController.search("t", -1, 10));
+        assertThrows(ConstraintViolationException.class, () -> itemController.search("t", -1, 10));
     }
 
     @Test
-    void createCommentTest() {
+    void createCommentTest() throws InterruptedException {
         UserDto user = userController.create(userDto);
-        ItemDto item = itemController.create(1L, itemInDto);
+        ItemDto item = itemController.create(user.getId(), itemInDto);
         UserDto user2 = userController.create(userDto2);
         bookingController.create(BookingRequestDto
                 .builder()
-                .start(LocalDateTime.of(2022, 10, 20, 12, 15))
-                .end(LocalDateTime.of(2022, 10, 27, 12, 15))
+                .start(LocalDateTime.now().plusSeconds(1))
+                .end(LocalDateTime.now().plusSeconds(2))
                 .itemId(item.getId()).build(), user2.getId());
-        bookingController.approve(1L, 1L, true);
+        bookingController.approve(1L, user.getId(), true);
+        TimeUnit.SECONDS.sleep(2);
         itemController.createComment(item.getId(), user2.getId(), comment);
         assertEquals(1, itemController.getById(1L, 1L).getComments().size());
     }
@@ -198,6 +201,6 @@ public class ItemControllerTests {
 
     @Test
     void getAllWithWrongFrom() {
-        assertThrows(BadRequestException.class, () -> itemController.getAllByOwner(1L, -1, 10));
+        assertThrows(ConstraintViolationException.class, () -> itemController.getAllByOwner(1L, -1, 10));
     }
 }
