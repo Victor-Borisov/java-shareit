@@ -16,7 +16,7 @@ public class ItemDto {
 
     private Boolean available;
 
-    private ItemRequestTiny request;
+    private Long requestId;
 
     private OwnerTiny owner;
 
@@ -25,13 +25,6 @@ public class ItemDto {
     private BookingTiny nextBooking;
 
     private List<CommentDto> comments;
-
-    @Data
-    @Builder
-    public static class ItemRequestTiny {
-        private final long id;
-        private final String description;
-    }
 
     @Data
     @Builder

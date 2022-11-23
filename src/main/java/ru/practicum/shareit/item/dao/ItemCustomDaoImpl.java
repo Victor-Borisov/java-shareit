@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.dao;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
 
@@ -16,7 +17,7 @@ public class ItemCustomDaoImpl implements ItemCustomDao {
     private EntityManager entityManager;
 
     @Override
-    public List<Item> findAllByCriteria(String pattern) {
+    public List<Item> findAllByCriteria(String pattern, PageRequest pageRequest) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Item> criteria = cb.createQuery(Item.class);
         Root<Item> item = criteria.from(Item.class);

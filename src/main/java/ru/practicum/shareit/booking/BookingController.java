@@ -34,14 +34,32 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingDto> getAllByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                          @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getAllByOwner(userId, StatusType.getEnumByString(state));
+                                          @RequestParam(defaultValue = "ALL") String state,
+                                          @RequestParam(defaultValue = "0") int from,
+                                          @RequestParam(defaultValue = "10") int size) {
+        if (from < 0) {
+            throw new BadRequestException("Parameter from must not be negative");
+        }
+        if (size <= 0) {
+            throw new BadRequestException("Parameter size must be positive");
+        }
+
+        return bookingService.getAllByOwner(userId, StatusType.getEnumByString(state), from, size);
     }
 
     @GetMapping
     public List<BookingDto> getAllByUser(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                         @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getAllByUser(userId, StatusType.getEnumByString(state));
+                                         @RequestParam(defaultValue = "ALL") String state,
+                                         @RequestParam(defaultValue = "0") int from,
+                                         @RequestParam(defaultValue = "10") int size) {
+        if (from < 0) {
+            throw new BadRequestException("Parameter from must not be negative");
+        }
+        if (size <= 0) {
+            throw new BadRequestException("Parameter size must be positive");
+        }
+
+        return bookingService.getAllByUser(userId, StatusType.getEnumByString(state), from, size);
     }
 
     @GetMapping("/{bookingId}")
