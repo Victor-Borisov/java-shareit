@@ -54,7 +54,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequest> itemRequestList = itemRequestRepository
                 .findAllByRequestorIdOrderByCreatedAsc(userId);
 
-        return(getItemRequestDtoList(itemRequestList));
+        return getItemRequestDtoList(itemRequestList);
     }
 
     @Transactional(readOnly = true)
@@ -64,7 +64,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequest> itemRequestList = itemRequestRepository
                 .findAllByRequestorIdNotLikeOrderByCreatedAsc(userId, PageRequest.of(from, size));
 
-        return(getItemRequestDtoList(itemRequestList));
+        return getItemRequestDtoList(itemRequestList);
     }
 
     @Transactional(readOnly = true)
