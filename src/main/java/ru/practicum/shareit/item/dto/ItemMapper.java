@@ -14,24 +14,20 @@ public class ItemMapper {
                 .id(item.getOwner().getId())
                 .name(item.getOwner().getName())
                 .build();
-        ItemDto.ItemRequestTiny itemRequestShort = item.getRequest() == null ? null : ItemDto.ItemRequestTiny
-                .builder()
-                .id(item.getRequest().getId())
-                .description(item.getRequest().getDescription())
-                .build();
+        Long requestId = item.getRequest() == null ? null : item.getRequest().getId();
         return ItemDto
                 .builder()
                 .id(item.getId())
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
-                .request(itemRequestShort)
+                .requestId(requestId)
                 .owner(owner)
                 .comments(new ArrayList<>())
                 .build();
     }
 
-    public static Item fromItemRequestDto(ItemRequestDto itemDto) {
+    public static Item fromItemInDto(ItemInDto itemDto) {
         return Item
                 .builder()
                 .id(itemDto.getId())

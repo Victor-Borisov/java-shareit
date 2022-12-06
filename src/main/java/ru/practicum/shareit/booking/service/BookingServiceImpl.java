@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,30 +81,31 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingDto> getAllByOwner(Long userId, StatusType state) {
+    public List<BookingDto> getAllByOwner(Long userId, StatusType state, int from, int size) {
         userService.getById(userId);
         final List<Booking> bookingDtoList;
+        PageRequest pageRequest = PageRequest.of(from / size, size, sort);
         switch (state) {
             case ALL:
-                bookingDtoList = bookingRepository.findAllByItemOwnerId(userId, sort);
+                bookingDtoList = bookingRepository.findAllByItemOwnerId(userId, pageRequest);
                 break;
             case CURRENT:
                 bookingDtoList = bookingRepository.findAllByItemOwnerIdAndStartBeforeAndEndAfter(userId,
-                        LocalDateTime.now(), LocalDateTime.now(), sort);
+                        LocalDateTime.now(), LocalDateTime.now(), pageRequest);
                 break;
             case PAST:
                 bookingDtoList = bookingRepository.findAllByItemOwnerIdAndEndBefore(userId,
-                        LocalDateTime.now(), sort);
+                        LocalDateTime.now(), pageRequest);
                 break;
             case FUTURE:
                 bookingDtoList = bookingRepository.findAllByItemOwnerIdAndStartAfter(userId,
-                        LocalDateTime.now(), sort);
+                        LocalDateTime.now(), pageRequest);
                 break;
             case WAITING:
-                bookingDtoList = bookingRepository.findAllByItemOwnerIdAndStatusEquals(userId, WAITING, sort);
+                bookingDtoList = bookingRepository.findAllByItemOwnerIdAndStatusEquals(userId, WAITING, pageRequest);
                 break;
             case REJECTED:
-                bookingDtoList = bookingRepository.findAllByItemOwnerIdAndStatusEquals(userId, REJECTED, sort);
+                bookingDtoList = bookingRepository.findAllByItemOwnerIdAndStatusEquals(userId, REJECTED, pageRequest);
                 break;
             default:
                 throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
@@ -114,30 +116,31 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingDto> getAllByUser(Long userId, StatusType state) {
+    public List<BookingDto> getAllByUser(Long userId, StatusType state, int from, int size) {
         userService.getById(userId);
         final List<Booking> bookingDtoList;
+        PageRequest pageRequest = PageRequest.of(from / size, size, sort);
         switch (state) {
             case ALL:
-                bookingDtoList = bookingRepository.findAllByBookerId(userId, sort);
+                bookingDtoList = bookingRepository.findAllByBookerId(userId, pageRequest);
                 break;
             case CURRENT:
                 bookingDtoList = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(userId,
-                        LocalDateTime.now(), LocalDateTime.now(), sort);
+                        LocalDateTime.now(), LocalDateTime.now(), pageRequest);
                 break;
             case PAST:
                 bookingDtoList = bookingRepository.findAllByBookerIdAndEndBefore(userId,
-                        LocalDateTime.now(), sort);
+                        LocalDateTime.now(), pageRequest);
                 break;
             case FUTURE:
                 bookingDtoList = bookingRepository.findAllByBookerIdAndStartAfter(userId,
-                        LocalDateTime.now(), sort);
+                        LocalDateTime.now(), pageRequest);
                 break;
             case WAITING:
-                bookingDtoList = bookingRepository.findAllByBookerIdAndStatusEquals(userId, WAITING, sort);
+                bookingDtoList = bookingRepository.findAllByBookerIdAndStatusEquals(userId, WAITING, pageRequest);
                 break;
             case REJECTED:
-                bookingDtoList = bookingRepository.findAllByBookerIdAndStatusEquals(userId, REJECTED, sort);
+                bookingDtoList = bookingRepository.findAllByBookerIdAndStatusEquals(userId, REJECTED, pageRequest);
                 break;
             default:
                 throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
