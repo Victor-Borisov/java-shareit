@@ -9,7 +9,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookItemRequestDto;
 import ru.practicum.shareit.booking.dto.BookingState;
-import ru.practicum.shareit.exceptions.BadRequestException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -40,9 +39,6 @@ public class BookingController {
     public ResponseEntity<Object> bookItem(
             @RequestHeader("X-Sharer-User-Id") long userId,
             @RequestBody @Valid BookItemRequestDto bookingRequestDto) {
-        if (!bookingRequestDto.getEnd().isAfter(bookingRequestDto.getStart())) {
-            throw new BadRequestException("End date can not be earlier start date");
-        }
         log.info("Creating booking {}, userId={}", bookingRequestDto, userId);
 
         return bookingClient.bookItem(userId, bookingRequestDto);

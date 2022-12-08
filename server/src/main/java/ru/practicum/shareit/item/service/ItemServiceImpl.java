@@ -26,7 +26,6 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -103,9 +102,6 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public List<ItemDto> search(String searchedText, int from, int size) {
-        if (searchedText.isBlank()) {
-            return Collections.emptyList();
-        }
         List<Item> allItems = itemRepository.findAllByCriteria(searchedText, PageRequest.of(from, size));
         return allItems.stream()
                        .map(ItemMapper::toItemDto)

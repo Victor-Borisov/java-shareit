@@ -8,10 +8,12 @@ import javax.validation.constraints.FutureOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.booking.valid.StartBeforeEndDateValid;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@StartBeforeEndDateValid
 public class BookItemRequestDto {
 	private long itemId;
 	@FutureOrPresent
