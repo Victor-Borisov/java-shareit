@@ -20,7 +20,6 @@ import ru.practicum.shareit.user.UserController;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -155,13 +154,6 @@ public class ItemControllerTests {
         userController.create(userDto);
         itemController.create(1L, itemInDto);
         assertEquals(1, itemController.search("Desc", 0, 10).size());
-    }
-
-    @Test
-    void searchEmptyTextTest() {
-        userController.create(userDto);
-        itemController.create(1L, itemInDto);
-        assertEquals(new ArrayList<ItemDto>(), itemController.search("", 0, 10));
     }
 
     @Test
