@@ -2,7 +2,6 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
@@ -70,7 +69,7 @@ public class ItemController {
             @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
         log.info("Search items by text {}", text);
         if (text.isBlank()) {
-            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+            return ResponseEntity.ok(Collections.emptyList());
         }
 
         return itemClient.searchItem(text, from, size);
